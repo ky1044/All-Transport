@@ -1,6 +1,12 @@
 import requests
 import json
 from geopy import distance
+import geocoder
+
+
+def get_user_location():
+	g = geocoder.ip('me')
+	return g.latlng
 
 
 def get_nearby_stations(lat,lon,radius,max_length):
@@ -10,9 +16,7 @@ def get_nearby_stations(lat,lon,radius,max_length):
 
 	user_coord = (lat,lon)
 
-
 	station_list=[]
-
 
 	for station in feed['data']['stations']:
 		station_coord = (station['lat'],station['lon'])
@@ -21,12 +25,11 @@ def get_nearby_stations(lat,lon,radius,max_length):
 		if station_distance<radius:
 			place = 0
 			for s in range(len(station_list)):
-				if station_list[s][1]<station_distance:
+				if station_list[s][2]<station_distance:
 					place=s
-			station_list.insert(place,[station['station_id'],station_distance])
+			station_list.insert(place,[station['station_id'],station['name'],station_distance])
 		# print(station_list)
 	return station_list[:max_length]
-
 
 
 def get_station_availability(station_list):
@@ -34,30 +37,32 @@ def get_station_availability(station_list):
 	resp = requests.get(url=url)
 	feed = resp.json()
 
-	stations = {}
-	station_list = ["438","236","326"]
+	station_statuses = {}
 	for station_number in station_list:
-		stations[station_number]={
+		station_statuses[station_number[0]]={
+		"name":station_number[1],
+		"distance":station_number[2],
 		"bikes":0,
 		"docks":0
 		}
 
-
 	for station in feed['data']['stations']:
-		if station["station_id"] in stations:
-			stations[station["station_id"]]["bikes"] = station["num_bikes_available"]
-			stations[station["station_id"]]["docks"]=station["num_docks_available"]
-			print(station)
+		if station["station_id"] in station_statuses:
+			#ISSUE: "bikes" and "docks" add up to number of docks, but valet stations don't always have all docks available to use so "docks" may be  overestimated.
+			station_statuses[station["station_id"]]["bikes"] = station["num_bikes_available"]
+			station_statuses[station["station_id"]]["docks"]=station["num_docks_available"]
 
-	#ISSUE: "bikes" and "docks" add up to number of docks, but valet stations don't always have all docks available to use so "docks" may be  overestimated. 		
-	for station,info in stations.items():
-		print("Station "+station+": "+str(info["bikes"])+" bikes out of "+str(info["bikes"]+info["docks"])+" available.")
+	return station_statuses
 
-	return stations
+def main_function():
+	user_latitude, user_longitude = get_user_location()
+	nearby_station_list = get_nearby_stations(user_latitude, user_longitude,1000,5)
+	nearby_station_status = get_station_availability(nearby_station_list)
+	for station,info in nearby_station_status.items():
+			print("Station "+info["name"]+" "+str(round(info["distance"],2))+" meters away"+": "+str(info["bikes"])+" bikes out of "+str(info["bikes"]+info["docks"])+" available.")
 
-
-
-
-print(get_nearby_stations(40.727258, -73.983639,1000,5))
+if __name__ == "__main__":
+	
+	main_function()
 
 
