@@ -1,13 +1,13 @@
 # Manhattan Transit
 a dashboard to see the status of all transit options. 
 
-##Information we plan to include
-core:
+## Information we plan to include
+**core:**  
 weather
 subway 
 bus
-citibike
+citibike  
 
-stretch: 
+**stretch:**  
 uber
 lyft
