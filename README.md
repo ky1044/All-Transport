@@ -1,2 +1,13 @@
-# All-Transport
-a quick glance to see the status of all your transit options
+# Manhattan Transit
+a dashboard to see the status of all transit options. 
+
+##Information we plan to include
+core:
+weather
+subway 
+bus
+citibike
+
+stretch: 
+uber
+lyft
