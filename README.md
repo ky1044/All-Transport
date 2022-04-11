@@ -3,11 +3,11 @@ a dashboard to see the status of all transit options.
 
 ## Information we plan to include
 **core:**  
-weather
-subway 
-bus
+weather  
+subway  
+bus  
 citibike  
 
 **stretch:**  
-uber
+uber  
 lyft
