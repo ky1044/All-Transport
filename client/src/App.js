@@ -3,16 +3,23 @@ import './App.css';
 
 function App() {
 
-  const location = {
-    "cityName":"New York",
-    "lat":40.733662,
-    "long":-73.986496
-  }
+  const [lat, setLat] = useState([]);
+  const [long, setLong] = useState([]);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      setLat(position.coords.latitude);
+      setLong(position.coords.longitude);
+    });
+
+    console.log("Latitude is:", lat)
+    console.log("Longitude is:", long)
+  }, [lat, long]);
 
   return (
     <div className="App">
       <h1>Manttan Transit</h1>
-      <Weather location = {location}/>
+      <Weather lat = {lat} long = {long}/>
     </div>
   );
 
@@ -20,17 +27,24 @@ function App() {
 
 function Weather(props){
 
-  const [weatherData, setData] = React.useState(null);
+  const [weatherData, setData] = useState(null);
 
-  React.useEffect(() => {
-    fetch(`/weather?lat=${props.location.lat}&long=${props.location.long}`)
+  useEffect(() => {
+    props.lat && props.long &&
+    fetch(`/weather?lat=${props.lat}&long=${props.long}`)
       .then((res) => res.json())
-      .then((data) => setData(data.message));
+      .then((data) => {
+        setData(data.message);
+      });
   }, []);
 
   return (
     <div>
-      <p>current weather in {props.location.cityName}: {!weatherData ? "Loading..." : weatherData}</p>
+      {
+        !weatherData || !weatherData.weather || !weatherData.weather[0]?
+        <p>Getting Current Weather...</p>:
+        <p>Current Weather for {weatherData.name}: {weatherData.weather[0].main} at {Math.floor(weatherData.main.temp-273.15)} Celcius</p>
+      }
     </div>
   );
 
