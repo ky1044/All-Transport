@@ -3,8 +3,8 @@ import './App.css';
 
 function App() {
 
-  const [lat, setLat] = useState([]);
-  const [long, setLong] = useState([]);
+  const [lat, setLat] = useState();
+  const [long, setLong] = useState();
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -36,7 +36,7 @@ function Weather(props){
       .then((data) => {
         setData(data.message);
       });
-  }, []);
+  }, [props.lat,props.long]);
 
   return (
     <div>
